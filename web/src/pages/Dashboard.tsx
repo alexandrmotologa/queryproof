@@ -6,9 +6,11 @@ import { ProbeMatrix } from '../components/ProbeMatrix';
 import { ProofVoucherCard } from '../components/ProofVoucher';
 import { MetricDictionary } from '../components/MetricDictionary';
 import { CatalogViewer } from '../components/CatalogViewer';
+import { FanoutGraph } from '../components/FanoutGraph';
+import { AuditLedgerView } from '../components/AuditLedger';
 import type { Catalog, Dialect, HealthInfo, Metric, Scenario, VerificationReport } from '../types';
 import { getCatalog, getHealth, getMetrics, getScenarios, verifyQuery } from '../api/client';
-import { ShieldAlert, FileCode2, BookOpen, Database } from 'lucide-react';
+import { ShieldAlert, FileCode2, BookOpen, Database, GitFork, History } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const [dialect, setDialect] = useState<Dialect>('postgres');
@@ -20,7 +22,7 @@ export const Dashboard: React.FC = () => {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [metricsList, setMetricsList] = useState<Metric[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'probes' | 'voucher' | 'metrics' | 'catalog'>('probes');
+  const [activeTab, setActiveTab] = useState<'probes' | 'fanout' | 'voucher' | 'ledger' | 'metrics' | 'catalog'>('probes');
 
   // Initial load
   useEffect(() => {
@@ -42,7 +44,6 @@ export const Dashboard: React.FC = () => {
         setSelectedScenarioId(scData[0].id);
         setQuery(scData[0].sql);
         setDialect(scData[0].dialect || 'postgres');
-        // Run initial verification on first scenario
         runVerification(scData[0].sql, scData[0].dialect || 'postgres');
       }
       if (catData) setCatalog(catData);
@@ -94,17 +95,17 @@ export const Dashboard: React.FC = () => {
         />
 
         {/* Tab Navigation */}
-        <div className="flex items-center space-x-1 border-b border-slate-800 pb-1 text-xs">
+        <div className="flex items-center space-x-1 border-b border-slate-800 pb-1 text-xs overflow-x-auto">
           <button
             onClick={() => setActiveTab('probes')}
-            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
               activeTab === 'probes'
                 ? 'bg-slate-900 text-cyan-300 border-t-2 border-cyan-500 border-x border-slate-800'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <ShieldAlert className="h-3.5 w-3.5" />
-            <span>Falsification Probes & Violations</span>
+            <span>Falsification Probes</span>
             {report?.suite_result && (
               <span
                 className={`ml-1 px-1.5 py-0.2 rounded text-[10px] ${
@@ -119,8 +120,20 @@ export const Dashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('fanout')}
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === 'fanout'
+                ? 'bg-slate-900 text-cyan-300 border-t-2 border-cyan-500 border-x border-slate-800'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <GitFork className="h-3.5 w-3.5" />
+            <span>Visual Fan-Out Flow</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('voucher')}
-            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
               activeTab === 'voucher'
                 ? 'bg-slate-900 text-cyan-300 border-t-2 border-cyan-500 border-x border-slate-800'
                 : 'text-slate-400 hover:text-slate-200'
@@ -136,15 +149,27 @@ export const Dashboard: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveTab('ledger')}
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === 'ledger'
+                ? 'bg-slate-900 text-cyan-300 border-t-2 border-cyan-500 border-x border-slate-800'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <History className="h-3.5 w-3.5" />
+            <span>Audit Ledger & Trends</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('metrics')}
-            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
               activeTab === 'metrics'
                 ? 'bg-slate-900 text-cyan-300 border-t-2 border-cyan-500 border-x border-slate-800'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
-            <span>Semantic Layer (metrics.yaml)</span>
+            <span>Semantic Layer</span>
             <span className="ml-1 px-1.5 py-0.2 rounded text-[10px] bg-slate-800 text-slate-400">
               {metricsList.length}
             </span>
@@ -152,7 +177,7 @@ export const Dashboard: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('catalog')}
-            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors cursor-pointer ${
+            className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
               activeTab === 'catalog'
                 ? 'bg-slate-900 text-cyan-300 border-t-2 border-cyan-500 border-x border-slate-800'
                 : 'text-slate-400 hover:text-slate-200'
@@ -169,7 +194,9 @@ export const Dashboard: React.FC = () => {
         {/* Tab Content Panes */}
         <div>
           {activeTab === 'probes' && <ProbeMatrix suiteResult={report?.suite_result || null} />}
+          {activeTab === 'fanout' && <FanoutGraph report={report} />}
           {activeTab === 'voucher' && <ProofVoucherCard voucher={report?.voucher || null} />}
+          {activeTab === 'ledger' && <AuditLedgerView />}
           {activeTab === 'metrics' && <MetricDictionary metrics={metricsList} />}
           {activeTab === 'catalog' && <CatalogViewer catalog={catalog} />}
         </div>
@@ -179,7 +206,7 @@ export const Dashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="font-semibold text-slate-400">queryproof</span>
-            <span>- Deterministic Falsification Engine for Enterprise Text-to-SQL</span>
+            <span>- Autonomous Text-to-SQL Verification Engine</span>
           </div>
           <div className="flex items-center space-x-3 text-[11px]">
             <span>Single-Binary Go Architecture (&lt; 20MB RAM)</span>

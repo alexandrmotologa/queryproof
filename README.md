@@ -74,7 +74,16 @@ Enforces mandatory multi-tenant scoping (`tenant_id = :tenant_id`) and soft-dele
 ### 5. Partition Pruning Guard
 Detects missing partition filters on analytical tables (such as BigQuery `_PARTITIONDATE` or Snowflake date keys) to prevent unconstrained full-table scans.
 
-### 6. Cryptographic Integrity Passport (`proof.json`)
+### 6. Automated Schema Introspection (`queryproof extract`)
+Introspects live PostgreSQL or SQLite schemas to extract tables, primary keys, foreign keys, nullability, and 1:N fan-out relationships directly into `catalog.json`.
+
+### 7. dbt Semantic Layer and Model Importer (`queryproof import-dbt`)
+Imports dbt models, relationships tests, measures, and semantic metrics directly into queryproof's semantic metric registry and catalog.
+
+### 8. Text-to-SQL Agent Gateway and Interceptor (`queryproof proxy`)
+Acts as a drop-in middleware proxy for LLM agents (LangChain, LlamaIndex, Vanna). Automatically intercepts tool calls, rewrites falsified SQL queries in place, and attaches proof vouchers to execution metadata.
+
+### 9. Cryptographic Integrity Passport (`proof.json`)
 Generates a tamper-evident voucher recording the original query hash, probe findings, applied AST mutations, and an HMAC-SHA256 signature.
 
 ---

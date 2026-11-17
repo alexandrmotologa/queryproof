@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/alexandrmotologa/queryproof/internal/config"
 	"github.com/alexandrmotologa/queryproof/internal/engine"
+	"github.com/alexandrmotologa/queryproof/internal/ledger"
 	"github.com/alexandrmotologa/queryproof/internal/metrics"
 	"github.com/alexandrmotologa/queryproof/internal/proof"
+	"github.com/alexandrmotologa/queryproof/internal/proxy"
 )
 
 type VerifyRequest struct {
@@ -44,15 +47,26 @@ type APIHandler struct {
 	engine    *engine.VerificationEngine
 	catalog   *config.Catalog
 	registry  *metrics.Registry
+	ledger    *ledger.AuditLedger
+	gateway   *proxy.AgentGateway
 	secretKey string
 	startTime time.Time
 }
 
-func NewAPIHandler(eng *engine.VerificationEngine, cat *config.Catalog, reg *metrics.Registry, secretKey string) *APIHandler {
+func NewAPIHandler(
+	eng *engine.VerificationEngine,
+	cat *config.Catalog,
+	reg *metrics.Registry,
+	led *ledger.AuditLedger,
+	gw *proxy.AgentGateway,
+	secretKey string,
+) *APIHandler {
 	return &APIHandler{
 		engine:    eng,
 		catalog:   cat,
 		registry:  reg,
+		ledger:    led,
+		gateway:   gw,
 		secretKey: secretKey,
 		startTime: time.Now(),
 	}
@@ -87,7 +101,67 @@ func (h *APIHandler) HandleVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if h.ledger != nil {
+		_ = h.ledger.RecordEvent(report)
+	}
+
 	writeJSON(w, http.StatusOK, report)
+}
+
+func (h *APIHandler) HandleLedger(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if h.ledger == nil {
+		writeJSON(w, http.StatusOK, map[string]interface{}{"entries": []interface{}{}, "total": 0})
+		return
+	}
+
+	limit := 50
+	offset := 0
+	if lStr := r.URL.Query().Get("limit"); lStr != "" {
+		if val, err := strconv.Atoi(lStr); err == nil && val > 0 {
+			limit = val
+		}
+	}
+	if oStr := r.URL.Query().Get("offset"); oStr != "" {
+		if val, err := strconv.Atoi(oStr); err == nil && val >= 0 {
+			offset = val
+		}
+	}
+
+	entries, total, err := h.ledger.ListEvents(limit, offset)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"entries": entries,
+		"total":   total,
+	})
+}
+
+func (h *APIHandler) HandleLedgerStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if h.ledger == nil {
+		writeJSON(w, http.StatusOK, &ledger.LedgerStats{})
+		return
+	}
+
+	stats, err := h.ledger.GetStats()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, stats)
 }
 
 func (h *APIHandler) HandleVerifyPassport(w http.ResponseWriter, r *http.Request) {

@@ -165,3 +165,29 @@ export interface HealthInfo {
   num_goroutine: number;
   uptime_seconds: number;
 }
+
+export interface LedgerEntry {
+  id: number;
+  voucher_id: string;
+  timestamp: string;
+  candidate_sql: string;
+  rewritten_sql?: string;
+  candidate_hash: string;
+  rewritten_hash?: string;
+  status: string;
+  integrity_score: number;
+  violations_count: number;
+  violations: Violation[];
+  latency_ms: number;
+}
+
+export interface LedgerStats {
+  total_queries: number;
+  certified_count: number;
+  falsified_count: number;
+  falsify_rate_pct: number;
+  avg_integrity_score: number;
+  avg_latency_ms: number;
+  probe_breakdown: Record<string, number>;
+  recent_violations: Violation[];
+}

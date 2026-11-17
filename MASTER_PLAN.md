@@ -191,38 +191,45 @@ queryproof/
 
 ## 5. Implementation Roadmap and Status
 
-- [ ] **Phase 1: Go Engine Foundation, Multi-Dialect SQL Parser, and AST Engine**
-  - [ ] Initialize Go 1.27 module (`github.com/alexandrmotologa/queryproof`).
-  - [ ] Implement schema catalog definitions (`internal/config/schema.go`) with table definitions, column types, nullability, primary keys, foreign keys, partition keys, and tenancy keys.
-  - [ ] Implement robust SQL AST parser and normalizer (`internal/ast/`) supporting PostgreSQL, Snowflake, and BigQuery dialects.
-  - [ ] Implement AST visitor to extract projected expressions, table aliases, join chains, and WHERE conditions.
-  - [ ] Implement AST rewriter for automated CTE isolation and COALESCE/NULLIF injection.
+- [x] **Phase 1: Go Engine Foundation, Multi-Dialect SQL Parser, and AST Engine**
+  - [x] Initialize Go 1.27 module (`github.com/alexandrmotologa/queryproof`).
+  - [x] Implement schema catalog definitions (`internal/config/schema.go`) with table definitions, column types, nullability, primary keys, foreign keys, partition keys, and tenancy keys.
+  - [x] Implement robust SQL AST parser and normalizer (`internal/ast/`) supporting PostgreSQL, Snowflake, and BigQuery dialects.
+  - [x] Implement AST visitor to extract projected expressions, table aliases, join chains, and WHERE conditions.
+  - [x] Implement AST rewriter for automated CTE isolation and COALESCE/NULLIF injection.
 
-- [ ] **Phase 2: Semantic Metric Layer (`metrics.yaml`)**
-  - [ ] Design and implement metric models and YAML loader (`internal/metrics/`).
-  - [ ] Build formula expression normalizer and tree comparator (`internal/metrics/validator.go`).
-  - [ ] Implement in-memory metric registry with fuzzy metric matching and alias resolution.
+- [x] **Phase 2: Semantic Metric Layer (`metrics.yaml`)**
+  - [x] Design and implement metric models and YAML loader (`internal/metrics/`).
+  - [x] Build formula expression normalizer and tree comparator (`internal/metrics/validator.go`).
+  - [x] Implement in-memory metric registry with fuzzy metric matching and alias resolution.
 
-- [ ] **Phase 3: Comprehensive Falsification Probes**
-  - [ ] Probe 1: Join Fan-Out and Cardinality Multiplier detector (`internal/probes/fanout.go`).
-  - [ ] Probe 2: Nullability masking and division-by-zero probe (`internal/probes/nulls.go`).
-  - [ ] Probe 3: Semantic metric formula invariant auditor (`internal/probes/metric_check.go`).
-  - [ ] Probe 4: Soft-delete and tenant isolation governance probe (`internal/probes/governance.go`).
-  - [ ] Probe 5: Partition pruning and unbounded scan detector (`internal/probes/partitioning.go`).
+- [x] **Phase 3: Comprehensive Falsification Probes**
+  - [x] Probe 1: Join Fan-Out and Cardinality Multiplier detector (`internal/probes/fanout.go`).
+  - [x] Probe 2: Nullability masking and division-by-zero probe (`internal/probes/nulls.go`).
+  - [x] Probe 3: Semantic metric formula invariant auditor (`internal/probes/metric_check.go`).
+  - [x] Probe 4: Soft-delete and tenant isolation governance probe (`internal/probes/governance.go`).
+  - [x] Probe 5: Partition pruning and unbounded scan detector (`internal/probes/partitioning.go`).
 
-- [ ] **Phase 4: Cryptographic Proof Voucher Generator and Warehouse Verification**
-  - [ ] Design `proof.json` schema and cryptographic SHA-256 signing engine (`internal/proof/`).
-  - [ ] Implement warehouse execution and plan estimator (`internal/warehouse/`).
-  - [ ] Build end-to-end verification pipeline aggregating probe results into structured verdicts.
+- [x] **Phase 4: Cryptographic Proof Voucher Generator and Warehouse Verification**
+  - [x] Design `proof.json` schema and cryptographic SHA-256 signing engine (`internal/proof/`).
+  - [x] Implement warehouse execution and plan estimator (`internal/warehouse/`).
+  - [x] Build end-to-end verification pipeline aggregating probe results into structured verdicts.
 
-- [ ] **Phase 5: Embedded React 19 BI Auditor Cockpit**
-  - [ ] Initialize React 19 + TypeScript + Vite + Tailwind CSS studio in `web/`.
-  - [ ] Implement interactive side-by-side SQL diff editor, probe matrix visualizer, and proof voucher badge.
-  - [ ] Implement interactive metrics explorer and enterprise test scenario selector.
-  - [ ] Embed built static assets into Go binary using `//go:embed` and build local HTTP server (`internal/server/`) on `:7373`.
+- [x] **Phase 5: Embedded React 19 BI Auditor Cockpit**
+  - [x] Initialize React 19 + TypeScript + Vite + Tailwind CSS studio in `web/`.
+  - [x] Implement interactive side-by-side SQL diff editor, probe matrix visualizer, and proof voucher badge.
+  - [x] Implement interactive metrics explorer and enterprise test scenario selector.
+  - [x] Embed built static assets into Go binary using `//go:embed` and build local HTTP server (`internal/server/`) on `:7373`.
 
-- [ ] **Phase 6: CLI Subcommands, Benchmark Suite, and Production Documentation**
-  - [ ] Implement full CLI commands in `cmd/queryproof/main.go` (`verify`, `audit`, `rewrite`, `serve`, `passport`).
-  - [ ] Create enterprise test scenarios and verify $< 15\text{ms}$ execution and $< 20\text{MB}$ RAM consumption.
-  - [ ] Write comprehensive humanized documentation (`README.md`, `docs/architecture.md`, `docs/falsification_probes.md`, `docs/semantic_layer_guide.md`, `docs/cli_reference.md`).
-  - [ ] Create GitHub CI workflow (`.github/workflows/ci.yml`) and ensure all tests pass.
+- [x] **Phase 6: CLI Subcommands, Benchmark Suite, and Production Documentation**
+  - [x] Implement full CLI commands in `cmd/queryproof/main.go` (`verify`, `audit`, `rewrite`, `serve`, `passport`).
+  - [x] Create enterprise test scenarios and verify $< 15\text{ms}$ execution and $< 20\text{MB}$ RAM consumption (actual: $< 1\text{ms}$, $\approx 0.30\text{MB}$ RAM).
+  - [x] Write comprehensive humanized documentation (`README.md`, `docs/architecture.md`, `docs/falsification_probes.md`, `docs/semantic_layer_guide.md`, `docs/cli_reference.md`).
+  - [x] Create GitHub CI workflow (`.github/workflows/ci.yml`) and ensure all tests pass.
+
+- [x] **Phase 7: Advanced Enterprise Features (Added Value)**
+  - [x] Live schema introspection for SQLite and PostgreSQL (`queryproof extract` in `internal/introspect/`).
+  - [x] dbt Semantic Layer and model schema importer (`queryproof import-dbt` in `internal/dbt/`).
+  - [x] Text-to-SQL Agent Gateway & Tool Interceptor (`queryproof proxy` in `internal/proxy/`).
+  - [x] Persistent historical audit ledger and trend analytics (`internal/ledger/`).
+  - [x] Interactive visual cardinality & fan-out flow diagram (`FanoutGraph.tsx`) and Audit Ledger (`AuditLedger.tsx`) in React 19 studio.

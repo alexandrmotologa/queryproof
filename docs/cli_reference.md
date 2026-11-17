@@ -68,7 +68,40 @@ Exit status is 0 if the signature is valid and content matches the original dige
 
 ---
 
-### 1.5 `queryproof serve`
+### 1.5 `queryproof extract`
+Introspects a live database (PostgreSQL or SQLite) and generates a complete `catalog.json` with primary keys, foreign keys, and inferred 1:N relationships.
+
+```bash
+# Introspect SQLite database
+queryproof extract --driver sqlite --dsn ./warehouse.db --out catalog.json
+
+# Introspect live PostgreSQL data warehouse
+queryproof extract --driver postgres --dsn "postgres://user:pass@host:5432/analytics" --out catalog.json
+```
+
+---
+
+### 1.6 `queryproof import-dbt`
+Traverses a dbt project directory, extracting models, column tests (`not_null`, `unique`, `relationships`), measures, and metrics into `catalog.json` and `metrics.yaml`.
+
+```bash
+queryproof import-dbt --dir ./dbt_project/models --out-catalog catalog.json --out-metrics metrics.yaml
+```
+
+---
+
+### 1.7 `queryproof proxy`
+Runs a standalone Text-to-SQL Agent Gateway proxy that intercepts agent tool calls and SQL execution payloads.
+
+```bash
+queryproof proxy --port 8080 -c catalog.json -m metrics.yaml
+```
+
+Agents send POST requests to `http://127.0.0.1:8080/v1/query/intercept`. If falsified, the proxy rewrites the query, logs the event to the audit ledger, and returns the safe SQL with its integrity voucher.
+
+---
+
+### 1.8 `queryproof serve`
 Launches the embedded local React 19 BI Auditor Cockpit and REST API server.
 
 ```bash
@@ -77,7 +110,7 @@ queryproof serve --port 7373 --host 127.0.0.1
 
 ---
 
-### 1.6 `queryproof version`
+### 1.9 `queryproof version`
 Displays binary version, Go runtime, and current memory footprint.
 
 ```bash

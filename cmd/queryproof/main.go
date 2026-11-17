@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -13,11 +14,17 @@ import (
 	"syscall"
 	"time"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/alexandrmotologa/queryproof/internal/config"
+	"github.com/alexandrmotologa/queryproof/internal/dbt"
 	"github.com/alexandrmotologa/queryproof/internal/engine"
+	"github.com/alexandrmotologa/queryproof/internal/introspect"
+	"github.com/alexandrmotologa/queryproof/internal/ledger"
 	"github.com/alexandrmotologa/queryproof/internal/metrics"
 	"github.com/alexandrmotologa/queryproof/internal/probes"
 	"github.com/alexandrmotologa/queryproof/internal/proof"
+	"github.com/alexandrmotologa/queryproof/internal/proxy"
 	"github.com/alexandrmotologa/queryproof/internal/server"
 	"github.com/alexandrmotologa/queryproof/web"
 )
@@ -40,6 +47,12 @@ func main() {
 		runAudit(os.Args[2:])
 	case "passport":
 		runPassport(os.Args[2:])
+	case "extract":
+		runExtract(os.Args[2:])
+	case "import-dbt":
+		runImportDbt(os.Args[2:])
+	case "proxy":
+		runProxy(os.Args[2:])
 	case "serve":
 		runServe(os.Args[2:])
 	case "version":
@@ -63,6 +76,9 @@ Commands:
   rewrite     Output only the certified, rewritten SQL to stdout (pipeline-friendly)
   audit       Run falsification audit on a SQL query or directory of queries
   passport    Cryptographically verify the integrity and signature of a proof.json file
+  extract     Introspect live database schema into catalog.json automatically
+  import-dbt  Import dbt project models, tests, and metrics into catalog and metrics.yaml
+  proxy       Run standalone agent gateway interceptor proxy
   serve       Launch embedded React 19 BI Auditor Cockpit & REST API server
   version     Display engine version and memory consumption statistics
 
@@ -351,6 +367,96 @@ func runPassport(args []string) {
 	fmt.Printf("HMAC Digest:   %s\n", voucher.Signature.Digest)
 }
 
+func runExtract(args []string) {
+	fs := flag.NewFlagSet("extract", flag.ExitOnError)
+	driver := fs.String("driver", "sqlite", "Database driver (sqlite, postgres)")
+	dsn := fs.String("dsn", "", "Database DSN / connection string")
+	outPath := fs.String("out", "catalog.json", "Output path for extracted catalog.json")
+	_ = fs.Parse(args)
+
+	if *dsn == "" {
+		fmt.Fprintln(os.Stderr, "Error: --dsn is required for schema extraction")
+		os.Exit(1)
+	}
+
+	cat, err := introspect.ExtractFromDatabase(context.Background(), *driver, *dsn)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Extraction failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	data, err := json.MarshalIndent(cat, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to marshal catalog: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := os.WriteFile(*outPath, data, 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to write catalog to %s: %v\n", *outPath, err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Extracted %d tables and %d relationships into %s\n", len(cat.Tables), len(cat.Relationships), *outPath)
+}
+
+func runImportDbt(args []string) {
+	fs := flag.NewFlagSet("import-dbt", flag.ExitOnError)
+	dirPath := fs.String("dir", ".", "Path to dbt project models directory")
+	outCat := fs.String("out-catalog", "catalog.json", "Output catalog.json path")
+	outMet := fs.String("out-metrics", "metrics.yaml", "Output metrics.yaml path")
+	_ = fs.Parse(args)
+
+	cat, dict, err := dbt.ImportDbtProject(*dirPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "dbt import failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	catData, _ := json.MarshalIndent(cat, "", "  ")
+	_ = os.WriteFile(*outCat, catData, 0644)
+
+	metData, _ := yaml.Marshal(dict)
+	_ = os.WriteFile(*outMet, metData, 0644)
+
+	fmt.Printf("Imported dbt project: %d tables, %d relationships into %s, %d metrics into %s\n",
+		len(cat.Tables), len(cat.Relationships), *outCat, len(dict.Metrics), *outMet)
+}
+
+func runProxy(args []string) {
+	fs := flag.NewFlagSet("proxy", flag.ExitOnError)
+	port := fs.Int("port", 8080, "Agent gateway proxy port")
+	catPath := fs.String("catalog", "", "Catalog path")
+	metPath := fs.String("metrics", "", "Metrics path")
+	_ = fs.Parse(args)
+
+	cat, reg := resolveCatalogAndMetrics(*catPath, *metPath)
+	cfg := config.DefaultConfig()
+
+	eng, err := engine.NewEngine(cfg, cat, reg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Engine error: %v\n", err)
+		os.Exit(1)
+	}
+
+	led, _ := ledger.OpenLedger(".queryproof/audit.db")
+	gw := proxy.NewAgentGateway(eng, led)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v1/query/intercept", gw.HandleIntercept)
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"status":"proxy-healthy"}`))
+	})
+
+	addr := fmt.Sprintf(":%d", *port)
+	fmt.Printf("[queryproof] Text-to-SQL Agent Gateway Proxy running on http://127.0.0.1%s\n", addr)
+	fmt.Printf("Intercept endpoint: POST http://127.0.0.1%s/v1/query/intercept\n", addr)
+	if err := http.ListenAndServe(addr, mux); err != nil {
+		fmt.Fprintf(os.Stderr, "Proxy failed: %v\n", err)
+		os.Exit(1)
+	}
+}
+
 func runServe(args []string) {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	port := fs.Int("port", 7373, "Server port")
@@ -370,7 +476,9 @@ func runServe(args []string) {
 		os.Exit(1)
 	}
 
-	srv := server.NewServer(&cfg.Server, eng, cat, reg, cfg.SecretKey, web.Assets())
+	led, _ := ledger.OpenLedger(".queryproof/audit.db")
+	gw := proxy.NewAgentGateway(eng, led)
+	srv := server.NewServer(&cfg.Server, eng, cat, reg, led, gw, cfg.SecretKey, web.Assets())
 
 	// Graceful shutdown handling
 	stop := make(chan os.Signal, 1)

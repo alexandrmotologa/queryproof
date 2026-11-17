@@ -33,7 +33,7 @@ func TestServerAPIEndpoints(t *testing.T) {
 		t.Fatalf("engine error: %v", err)
 	}
 
-	handler := NewAPIHandler(eng, cat, reg, "test-secret")
+	handler := NewAPIHandler(eng, cat, reg, nil, nil, "test-secret")
 
 	// Test 1: Health endpoint
 	reqHealth := httptest.NewRequest(http.MethodGet, "/api/health", nil)

@@ -11,7 +11,9 @@ import (
 
 	"github.com/alexandrmotologa/queryproof/internal/config"
 	"github.com/alexandrmotologa/queryproof/internal/engine"
+	"github.com/alexandrmotologa/queryproof/internal/ledger"
 	"github.com/alexandrmotologa/queryproof/internal/metrics"
+	"github.com/alexandrmotologa/queryproof/internal/proxy"
 )
 
 // Server represents the queryproof HTTP server.
@@ -28,6 +30,8 @@ func NewServer(
 	eng *engine.VerificationEngine,
 	cat *config.Catalog,
 	reg *metrics.Registry,
+	led *ledger.AuditLedger,
+	gw *proxy.AgentGateway,
 	secretKey string,
 	webAssets fs.FS,
 ) *Server {
@@ -35,7 +39,7 @@ func NewServer(
 		cfg = &config.ServerConfig{Port: 7373, Host: "127.0.0.1", CORS: true}
 	}
 
-	api := NewAPIHandler(eng, cat, reg, secretKey)
+	api := NewAPIHandler(eng, cat, reg, led, gw, secretKey)
 	mux := http.NewServeMux()
 
 	// Register API endpoints
@@ -45,6 +49,13 @@ func NewServer(
 	mux.HandleFunc("/api/metrics", api.HandleMetrics)
 	mux.HandleFunc("/api/scenarios", api.HandleScenarios)
 	mux.HandleFunc("/api/health", api.HandleHealth)
+	mux.HandleFunc("/api/ledger", api.HandleLedger)
+	mux.HandleFunc("/api/ledger/stats", api.HandleLedgerStats)
+
+	// Agent Interceptor Endpoint
+	if gw != nil {
+		mux.HandleFunc("/v1/query/intercept", gw.HandleIntercept)
+	}
 
 	// Static frontend assets serving
 	if webAssets != nil {

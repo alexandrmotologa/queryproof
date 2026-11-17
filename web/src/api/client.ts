@@ -1,4 +1,4 @@
-import type { Catalog, HealthInfo, Metric, ProofVoucher, Scenario, VerificationReport, Dialect } from '../types';
+import type { Catalog, HealthInfo, Metric, ProofVoucher, Scenario, VerificationReport, Dialect, LedgerEntry, LedgerStats } from '../types';
 
 const API_BASE = '/api';
 
@@ -49,5 +49,17 @@ export async function getScenarios(): Promise<Scenario[]> {
 export async function getHealth(): Promise<HealthInfo> {
   const res = await fetch(`${API_BASE}/health`);
   if (!res.ok) throw new Error('Failed to fetch health info');
+  return res.json();
+}
+
+export async function getLedgerEvents(limit: number = 50, offset: number = 0): Promise<{ entries: LedgerEntry[]; total: number }> {
+  const res = await fetch(`${API_BASE}/ledger?limit=${limit}&offset=${offset}`);
+  if (!res.ok) throw new Error('Failed to fetch ledger events');
+  return res.json();
+}
+
+export async function getLedgerStats(): Promise<LedgerStats> {
+  const res = await fetch(`${API_BASE}/ledger/stats`);
+  if (!res.ok) throw new Error('Failed to fetch ledger stats');
   return res.json();
 }

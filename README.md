@@ -1,10 +1,32 @@
-# queryproof
+<p align="center">
+  <img src="docs/images/logo.png?raw=true" alt="queryproof Logo" width="130" style="border-radius: 24px;" />
+</p>
 
-Deterministic verification and falsification engine for Text-to-SQL systems on Snowflake, BigQuery, and PostgreSQL.
+<h1 align="center">queryproof</h1>
 
-queryproof acts as a quality gate between generative AI agents and enterprise data warehouses. It parses SQL into abstract syntax trees (ASTs), executes deterministic mathematical falsification probes to detect join fan-out explosions, unhandled null arithmetic, governance filter omissions, and metric formula drift, and outputs an optimized rewritten query alongside a signed cryptographic integrity passport (`proof.json`).
+<p align="center">
+  <strong>Deterministic Text-to-SQL Verification and Falsification Engine for Enterprise Data Warehouses</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/go-1.27-blue?logo=go" alt="Go Version" />
+  <img src="https://img.shields.io/badge/react-19-61dafb?logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/memory-%3C%202MB%20RAM-emerald" alt="Memory" />
+  <img src="https://img.shields.io/badge/latency-%3C%201ms-cyan" alt="Latency" />
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
+</p>
+
+<p align="center">
+  <img src="docs/images/queryproof_demo.gif?raw=true" alt="queryproof Studio Interactive Demo" width="900" style="border-radius: 12px; border: 1px solid #1e293b;" />
+</p>
+
+queryproof acts as a quality gate between generative AI agents and enterprise data warehouses (Snowflake, BigQuery, PostgreSQL). It parses SQL into abstract syntax trees (ASTs), executes deterministic mathematical falsification probes to detect join fan-out explosions, unhandled null arithmetic, governance filter omissions, and metric formula drift, and outputs an optimized rewritten query alongside a signed cryptographic integrity passport (`proof.json`).
 
 The Go engine operates with under 2 MB of RAM and includes an embedded React 19 visual workbench.
+
+---
+
+## Architectural Overview
 
 ```
        +-------------------------------------------------------------+
@@ -88,6 +110,45 @@ Generates a tamper-evident voucher recording the original query hash, probe find
 
 ---
 
+## Visual Studio Cockpit (Embedded React 19)
+
+### Studio Dashboard & AST Mutation Workbench
+Side-by-side SQL diff comparing candidate text-to-sql against certified rewritten SQL with instant probe evaluations:
+
+<p align="center">
+  <img src="docs/images/dashboard_desktop.png?raw=true" alt="queryproof Desktop Studio" width="900" style="border-radius: 8px; border: 1px solid #1e293b;" />
+</p>
+
+### Visual Cardinality & Join Fan-Out Architecture Flow
+Interactive graph comparing naive join row multiplication versus CTE pre-aggregated isolation:
+
+<p align="center">
+  <img src="docs/images/fanout_flow.png?raw=true" alt="Visual Fan-Out Flow Diagram" width="900" style="border-radius: 8px; border: 1px solid #1e293b;" />
+</p>
+
+### Cryptographic Integrity Passport (`proof.json`)
+Signed verification voucher with SHA-256 digest and HMAC-SHA256 root authority signature:
+
+<p align="center">
+  <img src="docs/images/passport_verified.png?raw=true" alt="Cryptographic Passport Verification" width="900" style="border-radius: 8px; border: 1px solid #1e293b;" />
+</p>
+
+### Historical Verification Ledger & Trend Analytics
+Persisted audit trail tracking hallucination rates, latency percentiles, and probe violations over time:
+
+<p align="center">
+  <img src="docs/images/audit_ledger.png?raw=true" alt="Audit Ledger and Analytics" width="900" style="border-radius: 8px; border: 1px solid #1e293b;" />
+</p>
+
+### Responsive Mobile Interface
+Full cockpit functionality adapts cleanly to mobile devices and tablets:
+
+<p align="center">
+  <img src="docs/images/mobile_cockpit.png?raw=true" alt="Responsive Mobile Cockpit" width="340" style="border-radius: 12px; border: 1px solid #1e293b;" />
+</p>
+
+---
+
 ## Installation
 
 ### Prerequisites
@@ -155,29 +216,14 @@ Open `http://127.0.0.1:7373` in your browser to inspect candidate queries, view 
 ./bin/queryproof passport --proof proof.json
 ```
 
----
-
-## Repository Layout
-
+### 5. Introspect Schema from Live Database
+```bash
+./bin/queryproof extract --driver sqlite --dsn ./warehouse.db --out catalog.json
 ```
-queryproof/
-├── cmd/
-│   └── queryproof/
-│       └── main.go                 # CLI subcommands: verify, rewrite, audit, passport, serve
-├── internal/
-│   ├── config/                     # Catalog schema and probe configuration
-│   ├── ast/                        # SQL lexer, recursive-descent parser, rewriter
-│   ├── metrics/                    # Semantic metrics.yaml loader and AST formula validator
-│   ├── probes/                     # Five deterministic falsification probes
-│   ├── proof/                      # proof.json voucher generator and HMAC-SHA256 signer
-│   ├── warehouse/                  # In-memory execution sandbox and explain runner
-│   └── server/                     # REST API handler and static asset server
-├── web/                            # React 19 TypeScript Vite studio
-├── examples/                       # Sample catalog, metrics.yaml, and failure queries
-├── docs/                           # Architectural and mathematical documentation
-├── Makefile
-├── go.mod
-└── README.md
+
+### 6. Run Agent Gateway Proxy
+```bash
+./bin/queryproof proxy --port 8080 -c catalog.json -m metrics.yaml
 ```
 
 ---
@@ -193,4 +239,4 @@ queryproof/
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+MIT License.

@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="squircle-clip">
+      <rect x="24" y="24" width="976" height="976" rx="220" />
+    </clipPath>
+
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="amber-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+
+    <linearGradient id="slate-grad-1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <linearGradient id="slate-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <filter id="subtle-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.14" />
+    </filter>
+
+    <filter id="eye-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#00f5ff" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Luxury White Squircle Container -->
+  <rect x="24" y="24" width="976" height="976" rx="220" fill="#ffffff" stroke="#e2e8f0" stroke-width="6" />
+
+  <g clip-path="url(#squircle-clip)">
+    <!-- Centered Architectural Composition -->
+    <g transform="translate(512, 512)" filter="url(#subtle-shadow)">
+
+      <!-- Hexagonal Architectural Gateway Frame -->
+      <polygon points="
+        0,-395
+        342,-198
+        342,198
+        0,395
+        -342,198
+        -342,-198
+      " fill="none" stroke="#0f172a" stroke-width="40" stroke-linejoin="round" />
+
+      <!-- Inner Cyan Telemetry Hexagonal Rail -->
+      <polygon points="
+        0,-355
+        308,-178
+        308,178
+        0,355
+        -308,178
+        -308,-178
+      " fill="none" stroke="#00f5ff" stroke-width="4" opacity="0.45" stroke-dasharray="16, 12" />
+
+      <!-- ============================================================ -->
+      <!-- THE AUDITOR OWL: Symmetrical Origami / Low-Poly Mascot       -->
+      <!-- ============================================================ -->
+
+      <!-- 1. 100% Watertight Solid Obsidian Base Silhouette -->
+      <path d="
+        M 0 -290
+        L 95 -320 L 140 -280 L 195 -295 L 240 -170 L 260 -40
+        L 245 100 L 205 210 L 130 290 L 0 340
+        L -130 290 L -205 210 L -245 100 L -260 -40
+        L -240 -170 L -195 -295 L -140 -280 L -95 -320
+        Z
+      " fill="#0b0f19" />
+
+      <!-- 2. Crown & Ear Tufts (Discernment Antennas) -->
+      <!-- Left Ear Tuft -->
+      <polygon points="0,-290 -95,-320 -140,-240" fill="#1e293b" />
+      <polygon points="-95,-320 -140,-280 -140,-240" fill="#334155" />
+      <polygon points="-140,-280 -195,-295 -165,-210" fill="#0f172a" />
+      <polygon points="-140,-240 -165,-210 -110,-190" fill="#475569" />
+
+      <!-- Right Ear Tuft (Mirror) -->
+      <polygon points="0,-290 95,-320 140,-240" fill="#334155" />
+      <polygon points="95,-320 140,-280 140,-240" fill="#475569" />
+      <polygon points="140,-280 195,-295 165,-210" fill="#1e293b" />
+      <polygon points="140,-240 165,-210 110,-190" fill="#334155" />
+
+      <!-- Central Forehead Keystones -->
+      <polygon points="0,-290 -55,-215 0,-180" fill="#1e293b" />
+      <polygon points="0,-290 55,-215 0,-180" fill="#334155" />
+      <polygon points="-55,-215 -110,-190 0,-180" fill="#0f172a" />
+      <polygon points="55,-215 110,-190 0,-180" fill="#1e293b" />
+
+      <!-- 3. Facial Mask & Brow Architecture -->
+      <polygon points="0,-180 -110,-190 -160,-130 0,-115" fill="#1e293b" />
+      <polygon points="0,-180 110,-190 160,-130 0,-115" fill="#334155" />
+
+      <polygon points="-160,-130 -195,-80 -95,-80 0,-115" fill="#0f172a" />
+      <polygon points="160,-130 195,-80 95,-80 0,-115" fill="#1e293b" />
+
+      <!-- Orbital Outer Socket Facets -->
+      <polygon points="-195,-80 -230,0 -130,20 -95,-80" fill="#334155" />
+      <polygon points="195,-80 230,0 130,20 95,-80" fill="#475569" />
+
+      <!-- 4. Electric Cyan Optics (The Mathematical Auditor Eyes) -->
+      <!-- Left Eye Orbit & Iris -->
+      <polygon points="-145,-55 -65,-55 -55,-10 -135,-10" fill="#050811" />
+      <polygon points="-140,-50 -70,-50 -60,-15 -130,-15" fill="url(#cyan-glow)" filter="url(#eye-glow)" />
+      <!-- Left Pupil (Hexagonal Precision Core) -->
+      <polygon points="-100,-42 -85,-32 -85,-23 -100,-18 -115,-23 -115,-32" fill="#0b0f19" />
+      <polygon points="-100,-35 -92,-30 -92,-25 -100,-22 -108,-25 -108,-30" fill="#00f5ff" />
+
+      <!-- Right Eye Orbit & Iris (Mirror) -->
+      <polygon points="145,-55 65,-55 55,-10 135,-10" fill="#050811" />
+      <polygon points="140,-50 70,-50 60,-15 130,-15" fill="url(#cyan-glow)" filter="url(#eye-glow)" />
+      <!-- Right Pupil (Hexagonal Precision Core) -->
+      <polygon points="100,-42 85,-32 85,-23 100,-18 115,-23 115,-32" fill="#0b0f19" />
+      <polygon points="100,-35 92,-30 92,-25 100,-22 108,-25 108,-30" fill="#00f5ff" />
+
+      <!-- 5. Geometric Beak / Central Mathematical Prism -->
+      <polygon points="0,-115 -25,-10 0,60" fill="#00f5ff" opacity="0.9" />
+      <polygon points="0,-115 25,-10 0,60" fill="#0284c7" />
+      <polygon points="0,60 -18,105 0,135" fill="#00f5ff" />
+      <polygon points="0,60 18,105 0,135" fill="#0284c7" />
+
+      <!-- Lower Facial Cheeks & Mandible Facets -->
+      <polygon points="-55,-10 0,60 -70,80 -130,20" fill="#1e293b" />
+      <polygon points="55,-10 0,60 70,80 130,20" fill="#334155" />
+      <polygon points="0,60 -70,80 -45,140 0,135" fill="#0f172a" />
+      <polygon points="0,60 70,80 45,140 0,135" fill="#1e293b" />
+
+      <!-- 6. Outer Wing Epaulets (Folded Architectural AST Shields) -->
+      <!-- Left Outer Wing Structure -->
+      <polygon points="-240,-170 -260,-40 -205,30 -195,-80" fill="#0f172a" />
+      <polygon points="-260,-40 -245,100 -180,110 -205,30" fill="#1e293b" />
+      <polygon points="-245,100 -205,210 -150,180 -180,110" fill="#334155" />
+      <polygon points="-205,210 -130,290 -100,240 -150,180" fill="#0f172a" />
+
+      <!-- Right Outer Wing Structure (Mirror) -->
+      <polygon points="240,-170 260,-40 205,30 195,-80" fill="#1e293b" />
+      <polygon points="260,-40 245,100 180,110 205,30" fill="#334155" />
+      <polygon points="245,100 205,210 150,180 180,110" fill="#475569" />
+      <polygon points="205,210 130,290 100,240 150,180" fill="#1e293b" />
+
+      <!-- 7. Central Chest Cryptographic Proof Breastplate -->
+      <!-- Diamond Core Shield -->
+      <polygon points="0,135 -75,190 0,270" fill="#1e293b" />
+      <polygon points="0,135 75,190 0,270" fill="#334155" />
+      <polygon points="-75,190 -130,215 -100,240 0,270" fill="#0f172a" />
+      <polygon points="75,190 130,215 100,240 0,270" fill="#1e293b" />
+
+      <!-- Lower Tail Feathers / Foundation Keystones -->
+      <polygon points="0,270 -60,315 0,340" fill="#00f5ff" opacity="0.8" />
+      <polygon points="0,270 60,315 0,340" fill="#0284c7" />
+      <polygon points="-60,315 -130,290 0,340" fill="#0f172a" />
+      <polygon points="60,315 130,290 0,340" fill="#1e293b" />
+
+      <!-- Subtle Mathematical Invariant Accent Linework on Breastplate -->
+      <line x1="0" y1="145" x2="0" y2="260" stroke="#00f5ff" stroke-width="3" opacity="0.7" />
+      <circle cx="0" cy="202" r="6" fill="#00f5ff" />
+
+    </g>
+  </g>
+</svg>

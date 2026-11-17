@@ -1,0 +1,29 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test and coverage artifacts
+*.out
+*.test
+
+# Go workspace
+go.work
+
+# Node & Frontend
+node_modules/
+web/node_modules/
+web/dist/assets/*.map
+
+# Logs and OS
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

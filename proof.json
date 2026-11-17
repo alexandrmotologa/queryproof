@@ -1,0 +1,47 @@
+{
+  "version": "queryproof/v1",
+  "voucher_id": "vch_d0c98e832b6d5b88",
+  "issued_at": "2026-11-17T18:47:09Z",
+  "engine": "queryproof-go v1.0.0",
+  "dialect": "postgres",
+  "candidate_query": {
+    "raw_sql": "SELECT c.id, c.name, SUM(c.mrr) AS total_mrr, COUNT(o.id) AS order_cnt\nFROM customers AS c\nINNER JOIN orders AS o ON c.id = o.customer_id\nWHERE c.tenant_id = 'org_1' AND c.deleted_at IS NULL\nGROUP BY c.id, c.name",
+    "sha256": "2e2d55a098297c28c44a374d0672ef91ed2955837cd4221bf8e3a0a6e9f18c08",
+    "node_count": 4,
+    "table_count": 2
+  },
+  "status": "FALSIFIED_AND_REWRITTEN",
+  "integrity_score": 0.98,
+  "violations_detected": [
+    {
+      "probe_name": "JoinFanoutGuard",
+      "severity": "CRITICAL",
+      "title": "Cartesian Metric Inflation: customers -\u003e orders (Fanout: 20.0x)",
+      "message": "Parent table \"customers\" measure \"c.mrr\" is aggregated (SUM) over 1:N join with \"orders\", inflating totals by approx 20.0x",
+      "offending_node": "SUM(c.mrr)",
+      "remediation": "Isolate child relation \"orders\" into a pre-aggregated Common Table Expression (CTE) before joining with \"customers\"",
+      "auto_fix_available": true,
+      "mathematical_proof": "Phi_join(customers, orders) = 20.00 \u003e 1.0. Aggregate SUM(c.mrr) evaluates across orders rows instead of 1 row per customers record."
+    }
+  ],
+  "rewritten_query": {
+    "raw_sql": "WITH orders_agg AS (\nSELECT customer_id AS customer_id, SUM(id) AS total_id\nFROM orders\nGROUP BY customer_id\n)\nSELECT c.id, c.name, SUM(c.mrr) AS total_mrr, COUNT(o.id) AS order_cnt\nFROM customers AS c\nINNER JOIN orders_agg AS o ON c.id = o.customer_id\nWHERE c.tenant_id = 'org_1' AND c.deleted_at IS NULL\nGROUP BY c.id, c.name",
+    "sha256": "4bc45c6ac41e2b6ef8aa5eee4be21e439e0908a3deac34d8d3146474d051a149",
+    "mutations_applied": [
+      {
+        "probe_name": "JoinFanoutGuard",
+        "target": "orders",
+        "description": "Pre-aggregated child relation \"orders\" into CTE \"orders_agg\" on key \"customer_id\" to prevent 1:N Cartesian multiplication",
+        "before_expr": "orders AS o",
+        "after_expr": "orders_agg AS o"
+      }
+    ]
+  },
+  "signature": {
+    "algorithm": "HMAC-SHA256",
+    "key_id": "queryproof-root-authority",
+    "digest": "f62e44490d878291580bed8cac2fb945bc568cc5cbc70bb5c5e1e33314c17d9d",
+    "signature": "85c0936715e03af30fe047875fed8edd5de36ea63bf2df9d675b699a00dbdd0b",
+    "signed_at": "2026-11-17T18:47:09Z"
+  }
+}

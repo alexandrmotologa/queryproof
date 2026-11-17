@@ -1,0 +1,19 @@
+dialect: "postgres"
+catalog_path: "examples/catalog.json"
+metrics_path: "examples/metrics.yaml"
+secret_key: "queryproof-enterprise-master-key"
+
+probes:
+  enable_fanout_guard: true
+  fanout_max_tolerance: 1.0
+  enable_nullability_test: true
+  enable_metric_check: true
+  enable_governance_guard: true
+  enable_partition_guard: true
+  enforce_tenant_filter: true
+  enforce_soft_delete: true
+
+server:
+  port: 7373
+  host: "127.0.0.1"
+  cors: true

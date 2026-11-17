@@ -1,0 +1,81 @@
+{
+  "dialect": "postgres",
+  "default_schema": "public",
+  "tables": [
+    {
+      "name": "customers",
+      "schema": "public",
+      "estimated_row_count": 25000,
+      "tenancy_filter": "tenant_id",
+      "soft_delete_filter": "deleted_at IS NULL",
+      "columns": [
+        { "name": "id", "data_type": "BIGINT", "nullable": false, "is_primary_key": true },
+        { "name": "name", "data_type": "VARCHAR(255)", "nullable": false, "is_primary_key": false },
+        { "name": "mrr", "data_type": "NUMERIC(12,2)", "nullable": false, "is_primary_key": false },
+        { "name": "plan_id", "data_type": "VARCHAR(50)", "nullable": false, "is_primary_key": false },
+        { "name": "tenant_id", "data_type": "VARCHAR(64)", "nullable": false, "is_tenancy_key": true },
+        { "name": "deleted_at", "data_type": "TIMESTAMP", "nullable": true, "is_soft_delete_key": true },
+        { "name": "created_at", "data_type": "TIMESTAMP", "nullable": false }
+      ]
+    },
+    {
+      "name": "orders",
+      "schema": "public",
+      "estimated_row_count": 500000,
+      "tenancy_filter": "tenant_id",
+      "columns": [
+        { "name": "id", "data_type": "BIGINT", "nullable": false, "is_primary_key": true },
+        { "name": "customer_id", "data_type": "BIGINT", "nullable": false, "is_foreign_key": true, "ref_table": "customers", "ref_column": "id" },
+        { "name": "amount", "data_type": "NUMERIC(12,2)", "nullable": false },
+        { "name": "discount_pct", "data_type": "NUMERIC(5,2)", "nullable": true, "description": "Optional promo discount. NULL means no discount." },
+        { "name": "status", "data_type": "VARCHAR(50)", "nullable": false },
+        { "name": "tenant_id", "data_type": "VARCHAR(64)", "nullable": false, "is_tenancy_key": true },
+        { "name": "order_date", "data_type": "DATE", "nullable": false }
+      ]
+    },
+    {
+      "name": "subscriptions",
+      "schema": "public",
+      "estimated_row_count": 40000,
+      "tenancy_filter": "tenant_id",
+      "columns": [
+        { "name": "id", "data_type": "BIGINT", "nullable": false, "is_primary_key": true },
+        { "name": "customer_id", "data_type": "BIGINT", "nullable": false, "is_foreign_key": true, "ref_table": "customers", "ref_column": "id" },
+        { "name": "mrr", "data_type": "NUMERIC(12,2)", "nullable": false },
+        { "name": "status", "data_type": "VARCHAR(50)", "nullable": false },
+        { "name": "tenant_id", "data_type": "VARCHAR(64)", "nullable": false, "is_tenancy_key": true }
+      ]
+    },
+    {
+      "name": "analytics_events",
+      "schema": "analytics",
+      "estimated_row_count": 50000000,
+      "partition_column": "event_date",
+      "columns": [
+        { "name": "event_id", "data_type": "VARCHAR(64)", "nullable": false, "is_primary_key": true },
+        { "name": "event_date", "data_type": "DATE", "nullable": false, "is_partition_key": true },
+        { "name": "user_id", "data_type": "VARCHAR(64)", "nullable": false },
+        { "name": "action", "data_type": "VARCHAR(100)", "nullable": false },
+        { "name": "properties_json", "data_type": "JSONB", "nullable": true }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_table": "customers",
+      "from_column": "id",
+      "to_table": "orders",
+      "to_column": "customer_id",
+      "cardinality": "1:N",
+      "fanout_rate": 20.0
+    },
+    {
+      "from_table": "customers",
+      "from_column": "id",
+      "to_table": "subscriptions",
+      "to_column": "customer_id",
+      "cardinality": "1:N",
+      "fanout_rate": 1.6
+    }
+  ]
+}

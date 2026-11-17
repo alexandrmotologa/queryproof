@@ -1,0 +1,51 @@
+version: "1.0.0"
+updated_at: "2026-11-17"
+description: "Authoritative semantic dictionary of enterprise financial KPIs"
+metrics:
+  - name: "ARR"
+    description: "Annual Recurring Revenue normalized from active customer monthly recurring revenue"
+    certified_formula: "SUM(mrr * 12)"
+    source_tables:
+      - "customers"
+    required_filters:
+      - "deleted_at IS NULL"
+    allowed_dimensions:
+      - "plan_id"
+      - "region"
+      - "tier"
+    owner: "Finance & RevOps"
+    certified: true
+
+  - name: "Net Churn Rate"
+    description: "Percentage of ARR lost from cancellations after accounting for expansion ARR"
+    certified_formula: "SUM(churned_mrr - expansion_mrr) / NULLIF(SUM(starting_mrr), 0)"
+    source_tables:
+      - "subscriptions"
+    required_filters:
+      - "period_type = 'monthly'"
+    allowed_dimensions:
+      - "cohort_month"
+      - "plan_id"
+    owner: "Strategic Finance"
+    certified: true
+
+  - name: "Average Order Value"
+    description: "Mean gross order value across completed checkout transactions"
+    certified_formula: "SUM(amount) / NULLIF(COUNT(id), 0)"
+    source_tables:
+      - "orders"
+    required_filters:
+      - "status = 'completed'"
+    allowed_dimensions:
+      - "tenant_id"
+      - "order_date"
+    owner: "Ecommerce Analytics"
+    certified: true
+
+  - name: "Gross Margin"
+    description: "Revenue minus cost of goods sold as a ratio of total revenue"
+    certified_formula: "SUM(revenue - cogs) / NULLIF(SUM(revenue), 0)"
+    source_tables:
+      - "invoices"
+    owner: "Corporate FP&A"
+    certified: true
